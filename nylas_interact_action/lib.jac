@@ -1,1 +1,3 @@
-include:jac nylas_interact_action;
+import from actions.jivas.nylas_interact_action {
+    nylas_interact_action
+}

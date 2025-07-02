@@ -1,8 +1,8 @@
 package:
   name: jivas/nylas_interact_action
   author: V75 Inc.
-  architype: NylasInteractAction
-  version: 0.0.1
+  archetype: NylasInteractAction
+  version: 0.1.0
   meta:
     title: Nylas Interact Action
     description: Gathers information in order to manage calendar events using Nylas API
@@ -10,10 +10,10 @@ package:
     type: interact_action
   config:
     singleton: true
-    order: 
+    order:
       weight: 0
       before: persona_interact_action
   dependencies:
-    jivas: ^2.0.0
+    jivas: ~2.1.0
     actions:
-      jivas/langchain_model_action: ^0.0.1
+      jivas/langchain_model_action: ~0.1.0
