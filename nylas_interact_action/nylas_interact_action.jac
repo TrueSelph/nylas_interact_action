@@ -5,7 +5,7 @@ import time;
 import from logging {Logger}
 import from jivas.agent.modules.agentlib.utils {Utils}
 import from jivas.agent.action.interact_action { InteractAction }
-import from jivas.agent.action.interact_graph_walker { interact_graph_walker }
+import from jivas.agent.action.agent_graph_walker { agent_graph_walker }
 
 
 node NylasInteractAction(InteractAction) {
@@ -147,18 +147,18 @@ node NylasInteractAction(InteractAction) {
         }
     ];
 
-    def touch(visitor: interact_graph_walker) -> bool {
+    def touch(visitor: agent_graph_walker) -> bool {
         # authorize the interact to run
         if ("unclassified" in (visitor.interaction_node.get_intents())) {
             return False;
         }
         else{
-            return True;
+            return True; 
         }
 
     }
 
-    def execute(visitor: interact_graph_walker) -> None {
+    def execute(visitor: agent_graph_walker) -> None {
         details_update_session = self.get_details_update_session(visitor);
 
         if(report := self.get_extracted_details(visitor)) {
@@ -195,7 +195,7 @@ node NylasInteractAction(InteractAction) {
             }
 
             # save the session data to the visitor frame node for later use
-            visitor.frame_node.variable_set(key=f"{self.get_type()}_session", value=details_update_session.export() );
+            visitor.frame_node.data_set(key=f"{self.get_type()}_session", value=details_update_session.export() );
         }
         intent = details_update_session.get_intent();
         user_name = details_update_session.get_user_name();
@@ -223,24 +223,21 @@ node NylasInteractAction(InteractAction) {
         }
         services:dict = self.services.copy();
 
+        # prepare the prompt with utterance
+        prompt_messages = [
+            {"system": self.prompt},
+            {"human": "{utterance}"}
+        ];
+
         if (self.history) {
-            # grab the history
-            prompt_messages = [];
+            # grab the history    
             statements = visitor.frame_node.get_transcript_statements(interactions = self.history_size, max_statement_length = self.max_statement_length);
             if (statements) {
-                prompt_messages.extend(statements);
-                self.logger.debug(f"history: {json.dumps(statements)}");
+                # prepend statements to the prompt messages
+                prompt_messages = statements + prompt_messages;
             }
-
-            prompt_messages.extend([{"system": self.prompt}]);
-            prompt_messages.extend([{"human": "{utterance}"}]);
-        } else {
-            # here we cater to whether we have context information or not..
-            prompt_messages = [
-                {"system": self.prompt},
-                {"human": "{utterance}"}
-            ];
         }
+           
         result_set = {};
 
         email = email.lower();
@@ -355,7 +352,7 @@ node NylasInteractAction(InteractAction) {
                                                 };
 
                                                 details_update_session.set_event_id(event_id=event['data']['id']);
-                                                visitor.frame_node.variable_set(key=f"{self.get_type()}_session", value=details_update_session.export() );
+                                                visitor.frame_node.data_set(key=f"{self.get_type()}_session", value=details_update_session.export() );
                                                 event_id = details_update_session.get_event_id();
                                                 nylas_action.appointments.append(created_appt);
                                                 visitor.frame_node.get_agent().export_descriptor();
@@ -388,7 +385,7 @@ node NylasInteractAction(InteractAction) {
                                     );
                                     visitor.interaction_node.add_directive(directive=approve_appointment_directive);
                                 }
-                                visitor.frame_node.variable_set(key=f"{self.get_type()}_session", value=details_update_session.export() );
+                                visitor.frame_node.data_set(key=f"{self.get_type()}_session", value=details_update_session.export() );
                                 #books appointment once it is determined that the time requested is available
                             }
                         }
@@ -538,7 +535,7 @@ node NylasInteractAction(InteractAction) {
                 }
 
             }
-            visitor.frame_node.variable_set(key=f"{self.get_type()}_session", value=details_update_session.export() );
+            visitor.frame_node.data_set(key=f"{self.get_type()}_session", value=details_update_session.export() );
         }
 
     }
@@ -573,9 +570,9 @@ node NylasInteractAction(InteractAction) {
             return False;
         }
     }
-    def get_details_update_session(visitor: interact_graph_walker) -> DetailsUpdateSession {
+    def get_details_update_session(visitor: agent_graph_walker) -> DetailsUpdateSession {
         # check the user session for DetailsUpdateSession obj
-        if( details_update_session_data := visitor.frame_node.variable_get(key=f"{self.get_type()}_session") ) {
+        if( details_update_session_data := visitor.frame_node.data_get(key=f"{self.get_type()}_session") ) {
 
             # wrap the session data in the object for easier handling
             details_update_session = DetailsUpdateSession(
@@ -595,7 +592,7 @@ node NylasInteractAction(InteractAction) {
         }
         return details_update_session;
     }
-    def get_extracted_details(visitor: interact_graph_walker) -> dict {
+    def get_extracted_details(visitor: agent_graph_walker) -> dict {
         # returns associated report description texts, if any
 
         # assess the response, look for any trace of applicable report descriptions
@@ -628,7 +625,7 @@ node NylasInteractAction(InteractAction) {
         return details;
     }
 
-    def get_extracted_confirmation_choice(visitor: interact_graph_walker) -> str {
+    def get_extracted_confirmation_choice(visitor: agent_graph_walker) -> str {
         # assess the response, look for any trace of applicable confirmation replies
         results = visitor.interaction_node.get_functions(action_label = self.get_type());
 
