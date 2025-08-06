@@ -3,7 +3,7 @@ import logging;
 import traceback;
 import time;
 import from logging {Logger}
-import from jivas.agent.modules.agentlib.utils {Utils}
+import from jivas.agent.modules.system.common { date_now }
 import from jivas.agent.action.interact_action { InteractAction }
 import from jivas.agent.action.agent_graph_walker { agent_graph_walker }
 
@@ -214,7 +214,7 @@ node NylasInteractAction(InteractAction) {
         end_time="";
         customer_status = "";
         calendar_id = self.calendar_id;
-        current_date = Utils.date_now(timezone=self.timezone, date_format='%Y-%m-%d %H:%M:%S');
+        current_date = date_now(timezone=self.timezone, date_format='%Y-%m-%d %H:%M:%S');
 
         services_list = [];
         for service in self.services{
@@ -277,7 +277,7 @@ node NylasInteractAction(InteractAction) {
                     }
 
                     elif(not target_date and target_time){
-                        start_time = Utils.date_now() + " " + target_time;
+                        start_time = date_now() + " " + target_time;
                     }
 
                     elif(target_date and target_time){
@@ -570,6 +570,7 @@ node NylasInteractAction(InteractAction) {
             return False;
         }
     }
+    
     def get_details_update_session(visitor: agent_graph_walker) -> DetailsUpdateSession {
         # check the user session for DetailsUpdateSession obj
         if( details_update_session_data := visitor.frame_node.data_get(key=f"{self.get_type()}_session") ) {
@@ -592,6 +593,7 @@ node NylasInteractAction(InteractAction) {
         }
         return details_update_session;
     }
+
     def get_extracted_details(visitor: agent_graph_walker) -> dict {
         # returns associated report description texts, if any
 
