@@ -153,7 +153,7 @@ node NylasInteractAction(InteractAction) {
             return False;
         }
         else{
-            return True; 
+            return True;
         }
 
     }
@@ -230,14 +230,14 @@ node NylasInteractAction(InteractAction) {
         ];
 
         if (self.history) {
-            # grab the history    
+            # grab the history
             statements = visitor.frame_node.get_transcript_statements(interactions = self.history_size, max_statement_length = self.max_statement_length);
             if (statements) {
                 # prepend statements to the prompt messages
                 prompt_messages = statements + prompt_messages;
             }
         }
-           
+
         result_set = {};
 
         email = email.lower();
@@ -570,7 +570,7 @@ node NylasInteractAction(InteractAction) {
             return False;
         }
     }
-    
+
     def get_details_update_session(visitor: agent_graph_walker) -> DetailsUpdateSession {
         # check the user session for DetailsUpdateSession obj
         if( details_update_session_data := visitor.frame_node.data_get(key=f"{self.get_type()}_session") ) {
